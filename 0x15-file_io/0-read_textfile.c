@@ -1,38 +1,39 @@
-#include "holberton.h"
-/**
- * read_textfile - read a textfile.
- * @filename: name of the file to open.
- * @letters: number of letters to print in the standar ouput.
- *
- * Return: number of letter printed.
- */
+#include "main.h"
+#include <stdlib.h>
 
+/**
+ * read_textfile - Reads a text file and prints it to POSIX stdout.
+ * @filename: A pointer to the name of the file.
+ * @letters: The number of letters the
+ *           function should read and print.
+ *
+ * Return: If the function fails or filename is NULL - 0.
+ *         O/w - the actual number of bytes the function can read and print.
+ */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	int fd_read, count_chars, fd_open;
-	char *buf_letters;
+	ssize_t o, r, w;
+	char *buffer;
 
 	if (filename == NULL)
 		return (0);
-	fd_open = open(filename, O_RDONLY);
-	if (fd_open == -1)
+
+	buffer = malloc(sizeof(char) * letters);
+	if (buffer == NULL)
 		return (0);
-	buf_letters = malloc(sizeof(char) * letters);
-	if (buf_letters == NULL)
-		return (0);
-	fd_read = read(fd_open, buf_letters, letters);
-	if (fd_read == -1)
+
+	o = open(filename, O_RDONLY);
+	r = read(o, buffer, letters);
+	w = write(STDOUT_FILENO, buffer, r);
+
+	if (o == -1 || r == -1 || w == -1 || w != r)
 	{
-		free(buf_letters);
+		free(buffer);
 		return (0);
 	}
-	count_chars = write(STDOUT_FILENO, buf_letters, fd_read);
-	if (count_chars == -1)
-	{
-		free(buf_letters);
-		return (0);
-	}
-	close(fd_open);
-	free(buf_letters);
-	return (count_chars);
+
+	free(buffer);
+	close(o);
+
+	return (w);
 }
